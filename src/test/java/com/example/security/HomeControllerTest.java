@@ -5,9 +5,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,24 +23,37 @@ public class HomeControllerTest {
     MockMvc mockMvc;
 
     @Test
+    @WithMockUser
     public void hello() throws Exception {
-        mockMvc.perform(get("/hello").accept(MediaType.TEXT_HTML))
+        mockMvc.perform(get("/hello"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("hello"));
     }
 
     @Test
+    public void hello_without_user() throws Exception {
+        mockMvc.perform(get("/hello"))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
     public void my() throws Exception {
-        mockMvc.perform(get("/my"))
+        mockMvc.perform(get("/my").accept(MediaType.TEXT_HTML))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("my"));
     }
 
     @Test
+    @WithMockUser
     public void say() throws Exception {
-        mockMvc.perform(get("/say"))
+        mockMvc.perform(get("/say")
+                        //.with(user("user")
+                        //.password("password"))
+                        )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("/say"));
